@@ -1,6 +1,9 @@
+import 'dart:convert';
+import 'package:clima/screens/location_screen.dart';
 import 'package:clima/services/networking.dart';
 import 'package:flutter/material.dart';
 import 'package:clima/services/location_finder.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 
 class LoadingScreen extends StatefulWidget {
@@ -10,15 +13,9 @@ class LoadingScreen extends StatefulWidget {
 
 class _LoadingScreenState extends State<LoadingScreen> {
 
-  LocationFinder locator = LocationFinder();
-
-
+  //Initialize all constant and necessary variables
+  LocationPermission locator = LocationPermission();
   static const String apiKey = "ed2d710f4d52137bc9e6e8ffa89cc926";
-
-
-
-  double latitude;
-  double longitude;
   String apiUrl = "";
 
   @override
@@ -27,78 +24,55 @@ class _LoadingScreenState extends State<LoadingScreen> {
     super.initState();
   }
 
+  //Controls the order functions are executed
   void orderOfContent() async {
     await getLocation();
     getLocalData();
-    // await getData();
+
   }
 
-
+  //Generates url string to pass to api call
   void getLocation() async {
-    await locator.locationGrabber();
-
-    latitude = locator.latitude;
-    longitude = locator.longitude;
-    apiUrl =  "https://api.openweathermap.org/data/2.5/weather?lat=$latitude&lon=$longitude&appid=$apiKey";
+    //asks for location permissions
+    await locator.permissionChecker();
+    apiUrl =  "https://api.openweathermap.org/data/2.5/weather?lat=${locator.latitude}&lon=${locator.longitude}&appid=$apiKey";
   }
+
+
+  //Calls networking protocols to fetch JSON data from api call
+  //then push navigation to load the Location Page
 
   void getLocalData () async {
-    networkHelper networkBrain = networkHelper(apiUrl);
-    networkBrain.getData();
+    NetworkHelper networkBrain = NetworkHelper(apiUrl);
+    await networkBrain.getData();
+
+    var data = networkBrain.decodedData;
+    String city = jsonDecode(data)['name'];
+    double temp =  jsonDecode(data)['main']['temp'];
+    double weather =  jsonDecode(data)['weather'][0]['id'];
+
+    print(city);
+    print(temp);
+    print(weather);
+
+    // Navigator.push(context, MaterialPageRoute(builder: (context) {
+    //  return LocationScreen(liveCity: city,liveTemp: temp,liveWeather: weather,);
+    // }));
+
   }
 
-  // void getData() async{
-  //
-  // Response apiResponse =  await get(Uri.parse('https://api.openweathermap.org/data/2.5/weather?lat=$latitude&lon=$longitude&appid=$apiKey')
-  // );
-  //
-  // // print(apiResponse.body);
-  //
-  //
-  // if (apiResponse.statusCode == 200) {
-  //
-  //   String data = apiResponse.body;
-  //   var decodedData = jsonDecode(data);
-  //
-  //   var cityName = decodedData['name'];
-  //   double temp = decodedData['main']['temp'];
-  //   int weather = decodedData['weather'][0]['id'];
-  //
-  //
-  //   print(cityName);
-  //   print(temp);
-  //   print(weather);
-  //
-  //
-  //
-  // }
-  //
-  // else {
-  //
-  // }
-  //
-  //
-  //
-  // }
 
-
-
-
+  //Creates a loading animation
+  final spinKit = SpinKitRotatingCircle(
+    color: Colors.white,
+    size: 50.0,
+  );
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: RaisedButton(
-          onPressed: () {
-            getLocation();
-            // print(locator.longitude);
-            // print(locator.latitude);
-            //Get the current location
-          },
-          child: Text('Get Location'),
-        ),
-      ),
+      body: spinKit,
     );
   }
 }
+

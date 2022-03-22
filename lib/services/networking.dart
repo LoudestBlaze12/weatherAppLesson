@@ -1,30 +1,33 @@
 import 'package:http/http.dart';
 import 'dart:convert';
 
-class networkHelper {
+class NetworkHelper {
 
-  networkHelper(this.url);
+  NetworkHelper(this.url);
 
   String url;
-
+  var decodedData;
+  var cityName;
+  double temp;
+  int weather;
 
 
   void getData() async{
 
+    //Makes call with string url
     Response apiResponse =  await get(Uri.parse('$url')
     );
 
-    // print(apiResponse.body);
 
-
+    //Checks for errors, then decodes the JSON
     if (apiResponse.statusCode == 200) {
 
       String data = apiResponse.body;
-      var decodedData = jsonDecode(data);
+      decodedData = jsonDecode(data);
 
-      var cityName = decodedData['name'];
-      double temp = decodedData['main']['temp'];
-      int weather = decodedData['weather'][0]['id'];
+      cityName = decodedData['name'];
+      temp = decodedData['main']['temp'];
+      weather = decodedData['weather'][0]['id'];
 
 
       print(cityName);
@@ -35,10 +38,10 @@ class networkHelper {
 
     }
 
+    //prints status error is found
     else {
-
+      print(apiResponse.statusCode);
     }
-
 
 
   }
