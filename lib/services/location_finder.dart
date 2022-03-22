@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:location/location.dart';
 
 
@@ -136,7 +135,11 @@ import 'package:location/location.dart';
 //
 // }
 class LocationFinder {
-  void locationGrabber() async {
+
+  double latitude;
+  double longitude;
+
+  Future<void> locationGrabber() async {
     Location location = new Location();
 
     bool _serviceEnabled;
@@ -160,7 +163,8 @@ class LocationFinder {
     }
 
     _locationData = await location.getLocation();
-    print(_locationData);
+    latitude = _locationData.latitude;
+    longitude = _locationData.longitude;
   }
   }
 
